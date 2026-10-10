@@ -13,6 +13,8 @@
 
 Каталоги задаются элементом ``dir``, файлы — элементом ``file``.
 Двоичные данные хранятся в base64 (атрибут ``encoding="base64"``).
+Необязательный атрибут ``mode`` задаёт права в восьмеричном виде
+(по умолчанию 755 для каталогов и 644 для файлов).
 """
 
 import base64
@@ -20,6 +22,8 @@ import binascii
 import os
 import textwrap
 import xml.etree.ElementTree as ET
+
+from emulator.perms import DEFAULT_DIR_MODE, DEFAULT_FILE_MODE, parse_octal
 
 ROOT_TAG = "vfs"
 DIR_TAG = "dir"
@@ -33,14 +37,16 @@ class VFSError(Exception):
 
 
 class Node:
-    """Узел VFS: файл или каталог."""
+    """Узел VFS: файл или каталог с правами доступа mode."""
 
     is_dir = False
+    default_mode = DEFAULT_FILE_MODE
 
-    def __init__(self, name, parent=None):
+    def __init__(self, name, parent=None, mode=None):
         """Создаёт узел с именем name внутри каталога parent."""
         self.name = name
         self.parent = parent
+        self.mode = self.default_mode if mode is None else mode
 
     @property
     def path(self):
@@ -56,9 +62,9 @@ class Node:
 class File(Node):
     """Файл VFS; содержимое хранится в виде байтов."""
 
-    def __init__(self, name, parent=None, data=b""):
+    def __init__(self, name, parent=None, data=b"", mode=None):
         """Создаёт файл с содержимым data."""
-        super().__init__(name, parent)
+        super().__init__(name, parent, mode)
         self.data = data
 
     @property
@@ -66,16 +72,28 @@ class File(Node):
         """Размер файла в байтах."""
         return len(self.data)
 
+    def clone(self, name):
+        """Возвращает копию файла с новым именем (без родителя)."""
+        return File(name, data=self.data, mode=self.mode)
+
 
 class Directory(Node):
     """Каталог VFS; дочерние узлы хранятся в словаре по имени."""
 
     is_dir = True
+    default_mode = DEFAULT_DIR_MODE
 
-    def __init__(self, name, parent=None):
+    def __init__(self, name, parent=None, mode=None):
         """Создаёт пустой каталог."""
-        super().__init__(name, parent)
+        super().__init__(name, parent, mode)
         self.children = {}
+
+    def clone(self, name):
+        """Возвращает глубокую копию каталога с новым именем."""
+        copy = Directory(name, mode=self.mode)
+        for child_name, child in self.children.items():
+            copy.add(child.clone(child_name))
+        return copy
 
     def add(self, node):
         """Добавляет дочерний узел и возвращает его."""
@@ -160,14 +178,28 @@ def _check_name(element, directory):
     return name
 
 
+def _read_mode(element):
+    """Читает необязательный атрибут mode (восьмеричные права)."""
+    text = element.get("mode")
+    if text is None:
+        return None
+    mode = parse_octal(text)
+    if mode is None:
+        raise VFSError(
+            f"invalid mode '{text}' in '{element.get('name', '')}'")
+    return mode
+
+
 def _build(element, directory):
     """Рекурсивно заполняет каталог directory из XML-элемента."""
     for child in element:
         name = _check_name(child, directory)
+        mode = _read_mode(child)
         if child.tag == DIR_TAG:
-            _build(child, directory.add(Directory(name)))
+            _build(child, directory.add(Directory(name, mode=mode)))
         elif child.tag == FILE_TAG:
-            directory.add(File(name, data=_decode_content(child)))
+            data = _decode_content(child)
+            directory.add(File(name, data=data, mode=mode))
         else:
             raise VFSError(f"unknown element <{child.tag}>")
 

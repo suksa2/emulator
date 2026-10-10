@@ -1,0 +1,49 @@
+# Стартовый скрипт этапа 5 (запуск с examples/vfs/deep.xml).
+# Все изменения выполняются только в памяти, XML-файл не меняется.
+# --- chmod: восьмеричный режим ---
+ls -l /etc
+chmod 640 /etc/motd
+chmod -v 0444 /etc/hostname
+ls -l /etc
+# --- chmod: символьный режим ---
+chmod u+x,g-r /etc/motd
+chmod a=r projects/todo.txt
+chmod +x projects/todo.txt
+chmod go-rwx notes.txt
+chmod -w projects/todo.txt    # -w — это режим, а не опция
+ls -l
+ls -l projects
+# --- chmod -R ---
+chmod -Rv 700 projects/app
+ls -l projects/app
+# --- ошибки chmod ---
+chmod                         # нет операндов
+chmod 755                     # нет пути
+chmod 999 notes.txt           # неверный режим
+chmod u*x notes.txt           # неверный режим
+chmod 644 /nope notes.txt     # нет такого пути
+chmod -Z notes.txt            # неверный режим
+# --- cp: файлы ---
+cp notes.txt notes.bak
+cp -v notes.txt /tmp
+cp /etc/motd /etc/hostname /tmp
+ls -l /tmp
+cp notes.txt notes.bak        # перезапись файла
+# --- cp: каталоги ---
+cp projects /tmp              # ошибка: нужен -r
+cp -r projects /tmp
+cp -Rv projects/app /tmp/app_copy
+ls /tmp /tmp/projects /tmp/app_copy
+cp -r /etc /tmp/projects      # копирование внутрь каталога
+ls /tmp/projects/etc
+# --- ошибки cp ---
+cp                            # нет операндов
+cp notes.txt                  # нет назначения
+cp /nope /tmp                 # нет источника
+cp notes.txt notes.txt        # тот же файл
+cp -r projects projects/app   # каталог в самого себя
+cp notes.txt /etc/motd /nope  # назначение не каталог
+cp notes.txt /no/such/file    # нет каталога назначения
+cp -r projects notes.bak      # каталог поверх файла
+cp -q a b                     # неверная опция
+vfs-info

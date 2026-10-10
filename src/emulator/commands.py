@@ -4,7 +4,9 @@ import itertools
 import time
 
 from emulator.errors import ExitRequest, ShellError
+from emulator.modify import cmd_chmod, cmd_cp
 from emulator.options import split_options
+from emulator.perms import format_mode
 
 MAX_EXIT_ARGS = 1
 MAX_CD_ARGS = 1
@@ -13,8 +15,6 @@ COUNT_WIDTH = 7
 SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR = 3600
 SECONDS_PER_DAY = 86400
-DIR_MODE = "drwxr-xr-x"
-FILE_MODE = "-rw-r--r--"
 
 
 def resolve_or_fail(shell, command, path):
@@ -30,8 +30,8 @@ def _ls_entry(node, name, long_format):
     if not long_format:
         return name
     if node.is_dir:
-        return f"{DIR_MODE} {len(node.children):>8} {name}"
-    return f"{FILE_MODE} {node.size:>8} {name}"
+        return f"{format_mode(node)} {len(node.children):>8} {name}"
+    return f"{format_mode(node)} {node.size:>8} {name}"
 
 
 def _ls_node(node, flags):
@@ -198,6 +198,8 @@ COMMANDS = {
     "whoami": cmd_whoami,
     "uniq": cmd_uniq,
     "uptime": cmd_uptime,
+    "chmod": cmd_chmod,
+    "cp": cmd_cp,
     "exit": cmd_exit,
     "vfs-info": cmd_vfs_info,
 }

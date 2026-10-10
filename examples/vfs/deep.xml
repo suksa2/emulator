@@ -2,7 +2,7 @@
 <!-- VFS с вложенностью более 3 уровней и домашним каталогом. -->
 <vfs name="deep" home="/home/user">
   <dir name="etc">
-    <file name="hostname">emulator
+    <file name="hostname" mode="600">emulator
 </file>
     <file name="motd">Welcome to the shell emulator!
 </file>
@@ -21,7 +21,7 @@
       </file>
       <dir name="projects">
         <dir name="app">
-          <file name="main.py">print("hello")
+          <file name="main.py" mode="755">print("hello")
 </file>
           <dir name="assets">
             <file name="logo.png" encoding="base64">
