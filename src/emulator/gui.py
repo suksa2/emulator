@@ -52,22 +52,34 @@ class EmulatorApp:
 
     def write(self, text="", tag=None):
         """Добавляет строку в область вывода."""
-        if tag is None and str(text).startswith(ERROR_PREFIX):
-            tag = "error"
+        if tag is None:
+            tag = self._detect_tag(str(text))
         self.text.configure(state="normal")
         self.text.insert("end", f"{text}\n", tag)
         self.text.configure(state="disabled")
         self.text.see("end")
 
-    def submit(self, line):
-        """Отображает ввод как диалог и выполняет команду."""
-        self.write(self.shell.prompt() + line, "prompt")
+    def guarded(self, func, *args):
+        """Вызывает func(*args); по запросу exit закрывает окно."""
         try:
-            self.shell.run_line(line)
+            func(*args)
         except ExitRequest as request:
             self.close(request.code)
             return
         self.prompt_label.configure(text=self.shell.prompt())
+
+    def _detect_tag(self, text):
+        """Выбирает оформление строки: ошибка, ввод или обычный вывод."""
+        if text.startswith(ERROR_PREFIX):
+            return "error"
+        if text.startswith(self.shell.prompt()):
+            return "prompt"
+        return None
+
+    def submit(self, line):
+        """Отображает ввод как диалог и выполняет команду."""
+        self.write(self.shell.prompt() + line, "prompt")
+        self.guarded(self.shell.run_line, line)
 
     def on_enter(self, _event=None):
         """Обработчик нажатия Enter в строке ввода."""
