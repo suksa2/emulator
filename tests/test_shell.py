@@ -20,12 +20,11 @@ class ShellTest(unittest.TestCase):
         self.assertEqual(self.shell.title(),
                          f"Эмулятор - [{self.shell.user}@{self.shell.host}]")
 
-    def test_stub_commands(self):
-        """Заглушки выводят имя и аргументы."""
-        self.assertTrue(self.shell.run_line("ls -l docs"))
+    def test_commands_run(self):
+        """Команды выполняются и выводят результат."""
         self.assertTrue(self.shell.run_line("cd /tmp"))
-        self.assertEqual(self.out.lines,
-                         ["ls: args=['-l', 'docs']", "cd: args=['/tmp']"])
+        self.assertTrue(self.shell.run_line("whoami"))
+        self.assertEqual(self.out.lines, [self.shell.user])
 
     def test_unknown_command(self):
         """Неизвестная команда — сообщение об ошибке."""

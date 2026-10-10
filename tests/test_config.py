@@ -58,14 +58,14 @@ class LoggerTest(TempDirTestCase):
         """Каждый вызов команды записывается с датой, временем и именем."""
         logger = CommandLogger(self.path("log.csv"))
         shell = Shell(output=Capture(), logger=logger)
-        shell.run_line("ls -a b")
+        shell.run_line("ls -a /etc")
         shell.run_line("nope")
         with self.assertRaises(ExitRequest):
             shell.execute("exit 2")
         logger.close()
         rows = self.read_rows("log.csv")
         self.assertEqual(rows[0], FIELDS)
-        self.assertEqual(rows[1][1:5], [shell.user, "ls", "-a b", "ok"])
+        self.assertEqual(rows[1][1:5], [shell.user, "ls", "-a /etc", "ok"])
         self.assertRegex(rows[1][0], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$")
         self.assertEqual(rows[2][4], "error")
         self.assertEqual(rows[3][4:], ["exit", "2"])
@@ -102,10 +102,10 @@ class ScriptTest(TempDirTestCase):
     def test_comments(self):
         """Комментарии # целиком и в конце строки."""
         self.assertEqual(strip_comment("cd a  # go"), "cd a")
-        path = self.write("# head\nls x # tail\n   # only\n")
+        path = self.write("# head\nwhoami # tail\n   # only\n")
         self.assertEqual(self.shell.run_script(path), 0)
         self.assertEqual(self.out.lines,
-                         [self.shell.prompt() + "ls x", "ls: args=['x']"])
+                         [self.shell.prompt() + "whoami", self.shell.user])
 
     def test_errors_reported(self):
         """Об ошибке сообщается с номером строки."""

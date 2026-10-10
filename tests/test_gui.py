@@ -37,12 +37,12 @@ class GuiTest(unittest.TestCase):
 
     def test_dialog(self):
         """Ввод отображается вместе с приглашением и выводом."""
-        self.app.entry.insert(0, "ls -a")
+        self.app.entry.insert(0, "whoami")
         self.app.on_enter()
         self.app.submit("nope")
         text = self.text()
-        self.assertIn(self.shell.prompt() + "ls -a", text)
-        self.assertIn("ls: args=['-a']", text)
+        self.assertIn(self.shell.prompt() + "whoami", text)
+        self.assertIn(f"\n{self.shell.user}\n", text)
         self.assertIn("error: nope: command not found", text)
         self.assertEqual(self.app.entry.get(), "")
 

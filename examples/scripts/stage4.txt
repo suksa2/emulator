@@ -1,0 +1,41 @@
+# Стартовый скрипт этапа 4 (запуск с examples/vfs/deep.xml).
+# --- whoami ---
+whoami
+whoami extra              # ошибка: лишний операнд
+# --- ls ---
+ls
+ls -a
+ls -l
+ls -la /
+ls /etc /var/log          # несколько каталогов
+ls ~/notes.txt            # файл
+ls -l projects/app/assets
+ls /nope                  # ошибка: нет такого пути
+ls -z                     # ошибка: неверная опция
+# --- cd ---
+cd projects/app
+cd ..
+cd ../../..
+cd -                      # предыдущий каталог
+cd                        # домашний каталог
+cd /etc/motd              # ошибка: не каталог
+cd /does/not/exist        # ошибка: нет такого пути
+cd a b                    # ошибка: лишние аргументы
+cd /var/log
+# --- uniq ---
+uniq system.log
+uniq -c system.log
+uniq -d system.log
+uniq -u system.log
+uniq -ci ~/notes.txt
+uniq                      # ошибка: нет операнда
+uniq /var                 # ошибка: каталог
+uniq missing.txt          # ошибка: нет файла
+uniq a b                  # ошибка: лишний операнд
+uniq -x system.log        # ошибка: неверная опция
+# --- uptime ---
+uptime
+uptime -p
+uptime -s
+uptime now                # ошибка: лишний операнд
+uptime -q                 # ошибка: неверная опция
