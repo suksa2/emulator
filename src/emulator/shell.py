@@ -6,6 +6,7 @@ import socket
 from emulator.commands import COMMANDS
 from emulator.errors import ExitRequest, ShellError
 from emulator.parser import parse
+from emulator.vfs import SEPARATOR, default_vfs
 
 COMMENT = "#"
 
@@ -18,23 +19,37 @@ def strip_comment(line):
 class Shell:
     """Командная оболочка эмулятора."""
 
-    def __init__(self, output=print, logger=None):
-        """Создаёт оболочку.
+    def __init__(self, vfs=None, output=print, logger=None):
+        """Создаёт оболочку над VFS.
 
+        Если VFS не передана, создаётся VFS по умолчанию в памяти.
         output — функция вывода строки, logger — CommandLogger или None.
         """
         self.output = output
         self.logger = logger
         self.user = getpass.getuser()
         self.host = socket.gethostname()
+        self.vfs = vfs if vfs is not None else default_vfs()
+        self.cwd = self.vfs.resolve(self.vfs.root, self.vfs.home)
 
     def title(self):
         """Заголовок окна на основе данных ОС."""
         return f"Эмулятор - [{self.user}@{self.host}]"
 
+    def display_path(self):
+        """Текущий путь для приглашения; домашний каталог — ~."""
+        path, home = self.cwd.path, self.vfs.home
+        if home == SEPARATOR:
+            return path
+        if path == home:
+            return "~"
+        if path.startswith(home + SEPARATOR):
+            return "~" + path[len(home):]
+        return path
+
     def prompt(self):
         """Приглашение к вводу вида user@host:~$ ."""
-        return f"{self.user}@{self.host}:~$ "
+        return f"{self.user}@{self.host}:{self.display_path()}$ "
 
     def execute(self, line):
         """Выполняет одну строку. Ошибки выбрасываются как ShellError."""

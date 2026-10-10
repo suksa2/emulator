@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Намеренно повреждённая VFS: незакрытый тег. -->
+<vfs name="broken">
+  <dir name="docs">
+    <file name="a.txt">text</file>
+</vfs>

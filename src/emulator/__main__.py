@@ -6,6 +6,7 @@ from emulator.config import dump_config, parse_args
 from emulator.errors import ExitRequest, ShellError
 from emulator.logger import CommandLogger, LogError
 from emulator.shell import Shell
+from emulator.vfs import VFSError, default_vfs, load_vfs
 
 STARTUP_DELAY_MS = 100
 
@@ -13,10 +14,14 @@ STARTUP_DELAY_MS = 100
 def build_shell(config):
     """Создаёт оболочку по параметрам; ошибки — ShellError."""
     try:
+        vfs = load_vfs(config.vfs) if config.vfs else default_vfs()
+    except VFSError as error:
+        raise ShellError(f"VFS load failed: {error}") from None
+    try:
         logger = CommandLogger(config.log) if config.log else None
     except LogError as error:
         raise ShellError(str(error)) from None
-    return Shell(logger=logger)
+    return Shell(vfs, logger=logger)
 
 
 def run_script_safely(shell, path):
@@ -50,6 +55,19 @@ def build_app(argv=None):
     return app
 
 
+def show_error_window(message):
+    """Показывает ошибку запуска в диалоговом окне."""
+    try:
+        import tkinter as tk
+        from tkinter import messagebox
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror("Эмулятор", message)
+        root.destroy()
+    except Exception:  # noqa: BLE001 - нет дисплея: достаточно консоли
+        pass
+
+
 def main(argv=None):
     """Запускает эмулятор в графическом или консольном режиме."""
     config = parse_args(argv)
@@ -62,6 +80,8 @@ def main(argv=None):
         return request.code
     except ShellError as error:
         print(f"error: {error}")
+        if not config.no_gui:
+            show_error_window(str(error))
         return 1
 
 

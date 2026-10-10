@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Несколько файлов в корне, включая двоичный (base64). -->
+<vfs name="several">
+  <file name="hello.txt">Hello, world!
+</file>
+  <file name="colors.txt">
+    red
+    red
+    green
+    blue
+    blue
+    blue
+    red
+  </file>
+  <file name="data.bin" encoding="base64">AAECAwQFBgcICQ==</file>
+  <dir name="empty"/>
+</vfs>

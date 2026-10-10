@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- VFS с вложенностью более 3 уровней и домашним каталогом. -->
+<vfs name="deep" home="/home/user">
+  <dir name="etc">
+    <file name="hostname">emulator
+</file>
+    <file name="motd">Welcome to the shell emulator!
+</file>
+  </dir>
+  <dir name="home">
+    <dir name="user">
+      <file name="notes.txt">
+        buy milk
+        buy milk
+        call mom
+        Call Mom
+        write report
+        write report
+        write report
+        buy milk
+      </file>
+      <dir name="projects">
+        <dir name="app">
+          <file name="main.py">print("hello")
+</file>
+          <dir name="assets">
+            <file name="logo.png" encoding="base64">
+              iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8
+              z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==
+            </file>
+          </dir>
+        </dir>
+        <file name="todo.txt">finish stage 5
+</file>
+      </dir>
+    </dir>
+  </dir>
+  <dir name="var">
+    <dir name="log">
+      <file name="system.log">
+        boot ok
+        boot ok
+        disk warning
+        disk warning
+        disk warning
+        network up
+      </file>
+    </dir>
+  </dir>
+  <dir name="tmp"/>
+</vfs>
